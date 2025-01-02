@@ -7,3 +7,4 @@ level = "info"
 [server]
 runOnSave = true
 maxUploadSize = 200
+enableCORS = false
