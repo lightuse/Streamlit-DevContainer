@@ -1,25 +1,29 @@
-name: Streamlit app
+name: Deploy Streamlit app to GitHub Pages
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
 
 jobs:
-  streamlit:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - uses: streamlit/streamlit-app-action@v0.0.3
+      - name: Install dependencies
+        run: |
+          pip install streamlit
+          pip install -r requirements.txt
+      - name: Build Streamlit app
+        run: streamlit run streamlit_app.py &
+      - name: Generate static files
+        run: |
+          mkdir build
+          wget -r -p -k -P build http://localhost:8501
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          app-path: app.py
-          ruff: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
