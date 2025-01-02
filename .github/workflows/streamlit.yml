@@ -1,23 +1,35 @@
-name: Deploy Streamlit App to GitHub Pages
+name: Deploy Streamlit app
+
 on:
   push:
-    branches: [main]
+    branches: [ main ]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: '3.10'
+          
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          pip install streamlit
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          
+      - name: Build static files
+        run: |
+          mkdir build
+          streamlit run app.py &
+          sleep 10
+          wget -r -k -p -l 7 -P build http://localhost:8501
+          
       - name: Deploy to GitHub Pages
-        uses: crazy-max/ghaction-github-pages@v2
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          target_branch: gh-pages
-          build_dir: .
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          force_orphan: true
