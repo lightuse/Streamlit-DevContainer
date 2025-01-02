@@ -8,3 +8,4 @@ level = "info"
 runOnSave = true
 maxUploadSize = 200
 enableCORS = false
+enableXsrfProtection = false
